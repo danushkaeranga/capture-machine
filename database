@@ -1,0 +1,17 @@
+create database project;
+
+create table packet(
+
+	pktNO int,
+	pktType varchar(10),
+	pktVersion varchar(10),
+	srcIP varchar(50),
+    	destIP varchar(50),
+	srcPort varchar(30),
+	destPort varchar(30),
+	srcMac varchar(50),
+	destMac varchar(50),
+	pktSize int,
+	
+	primary key (pktNo)
+);
