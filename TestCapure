@@ -1,0 +1,34 @@
+
+//Testing the packet capturing throw a interface
+
+package capture;
+
+import java.io.IOException;
+import jpcap.JpcapCaptor;
+import jpcap.NetworkInterface;
+import jpcap.packet.Packet;
+
+public class TestCapture {
+
+    public static void main(String[] args) throws IOException {
+        
+        NetworkInterface [] list = JpcapCaptor.getDeviceList();     
+        for(int x=0; x<list.length; x++){
+            System.out.println((x+1) +". "+ list[x].description);
+        } 
+        
+        JpcapCaptor captor;
+        captor = JpcapCaptor.openDevice(list[1], 65535, false, 20);
+        
+        int ptno = 1;
+        while (ptno < 11){
+            Packet packet = captor.getPacket();
+
+            if(packet != null){
+                System.out.println(packet.len);
+            }
+            ptno++;
+        }
+    }
+    
+}
