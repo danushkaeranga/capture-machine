@@ -1,0 +1,731 @@
+
+//before run make sure to run the XAMPP
+
+import java.awt.*;
+import java.awt.event.*;
+
+import java.io.*;
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import javax.swing.*;;
+import javax.swing.table.JTableHeader;
+import jpcap.JpcapCaptor;
+import jpcap.NetworkInterface;
+import jpcap.packet.*;
+
+public class Cmachine extends JFrame{
+    
+    Object  [][] data,data1;
+    int choose,pktNo,sum;
+    int count1 = 0,count2 = 0,count3 = 0,count4 = 0,count5 = 0;
+    String q1 = "a",q2 = "b",q3 = "c",q4 = "d",q5 = "e";
+    private JLabel label,label2,label3,label4,label5,label6,label7;
+    private JButton button,button2,button3,button4,button5,button6,clear;
+    private JTextField textField1,textField2;
+    private JTextField textField5,textField6,textField7,textField8,textField9;
+    private JTable table1;
+    private JPanel panel1,panel2,panel3,panel4,panel5,panel6,paneltest,paneltest1;
+    private JCheckBox cBox1,cBox2,cBox3,cBox4,cBox5;
+    private JFrame frame; 
+    private Calendar cal,cal2;
+    private SimpleDateFormat sdf,sdf2;
+    private String valnow,valnow2;
+    private String arr3[] = new String[3];
+    private String arr2[] = new String[3];
+    private int num1,num2,num3,num4,num5,num6;
+    
+    static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
+    
+    public Cmachine() throws SQLException{
+        setLayout (new FlowLayout());
+        
+        Statement st = Connect();
+        st.executeUpdate("drop database project1");
+        st.executeUpdate("CREATE DATABASE project1");
+        Statement st1 = Connect1();
+        st1.executeUpdate("create table packet(pktNO int,pktType varchar(10),pktVersion varchar(10),srcIP varchar(50),destIP varchar(50),srcPort varchar(30),destPort varchar(30),srcmac varchar(50),destmac varchar(50),pktsize int,primary key (pktNo))");
+        
+        panel1 = new JPanel();
+        panel1.setPreferredSize(new Dimension(180, 180));
+        panel1.setBackground(Color.LIGHT_GRAY);
+        add(panel1);
+        
+        panel2 = new JPanel();
+        panel2.setPreferredSize(new Dimension(300, 180));
+        panel2.setBackground(Color.LIGHT_GRAY);
+        add(panel2);
+        
+        panel3 = new JPanel();
+        panel3.setPreferredSize(new Dimension(360, 180));
+        panel3.setBackground(Color.LIGHT_GRAY);
+        add(panel3);
+        
+        panel4 = new JPanel();
+        panel4.setPreferredSize(new Dimension(180, 180));
+        panel4.setBackground(Color.LIGHT_GRAY);
+        add(panel4);
+        
+        paneltest = new JPanel();
+        paneltest.setPreferredSize(new Dimension(1100,420));
+        paneltest.setBackground(Color.LIGHT_GRAY);
+        add(paneltest);
+        
+        paneltest1 = new JPanel();
+        paneltest1.setPreferredSize(new Dimension(1100,420));
+        paneltest1.setBackground(Color.LIGHT_GRAY);
+        
+        button = new JButton("search interfaces");
+        panel1.add(button);
+        button.setPreferredSize(new Dimension(160, 30));
+        
+        event e = new event();
+        button.addActionListener(e);
+        
+        label2 = new JLabel("Interface Number : ");
+        panel2.add(label2);
+        label2.setFont(new Font("",5 , 16));
+        label2.setPreferredSize(new Dimension(140, 30));
+        
+        textField1 =  new JTextField(10);
+        textField1.setOpaque(false);
+        //textField1.setBounds(50, 30, 90, 40);
+        panel2.add(textField1);
+        
+        label3 = new JLabel("No Of Packets : ");
+        panel2.add(label3);
+        label3.setFont(new Font("",5 , 16));
+        label3.setPreferredSize(new Dimension(140, 30));
+        
+        textField2 =  new JTextField(10);
+        
+        panel2.add(textField2);
+        textField2.setOpaque(false);
+        
+        button2 = new JButton("Capture And Save");
+        panel2.add(button2);
+        button2.setPreferredSize(new Dimension(180, 30));
+        
+        label5 = new JLabel("");
+        panel2.add(label5);
+       
+        event2 e2 = new event2();
+        button2.addActionListener(e2);
+        
+        button3 = new JButton("Get Packets And Query");
+        panel2.add(button3);
+        button3.setPreferredSize(new Dimension(180, 30));
+
+        event3 e3 = new event3();
+        button3.addActionListener(e3);
+        
+        label7 = new JLabel("");
+        panel4.add(label7);
+
+        cBox1 = new JCheckBox("1. Source IP");
+        textField5 =  new JTextField(20);
+        cBox2 = new JCheckBox("2. Destination IP");
+        textField6 =  new JTextField(20);
+        cBox3 = new JCheckBox("3. Source port"); 
+        textField7 =  new JTextField(20);
+        cBox4 = new JCheckBox("4.Detination port");
+        textField8 =  new JTextField(20);
+        cBox5 = new JCheckBox("5. Packet Type");
+        textField9 =  new JTextField(20);
+        button4 = new JButton("Query");
+        button5 = new JButton("Sheared All Bytes");
+
+        label4 = new JLabel("");
+        label6 = new JLabel("");
+        button6 = new JButton("Data Captured Rate");
+        
+        event4 e4 = new event4();
+        button4.addActionListener(e4);
+  
+    }
+    
+    public class event implements ActionListener{
+        public void actionPerformed(ActionEvent e){
+            
+            NetworkInterface[] list;
+            list = JpcapCaptor.getDeviceList();
+      
+            for(int x=0; x<list.length; x++){
+   
+                label = new JLabel("");
+                panel1.add(label);
+                label.setFont(new Font("Arial",2 , 25));
+                label.setText((x+1) +". "+ list[x].description);
+                label.setPreferredSize(new Dimension(160, 30));
+            }
+        }
+    }
+
+    public class event2 implements ActionListener{
+        public void actionPerformed(ActionEvent e2){
+            
+            try {  
+                Statement st = Connect1();
+                String insert1="truncate packet";
+                st.executeUpdate(insert1);
+                
+
+                try {
+                    int pktno;
+                    choose = (int)Double.parseDouble(textField1.getText());
+                    pktNo = (int)Double.parseDouble(textField2.getText());
+
+                    NetworkInterface[] list2;
+                    list2 = JpcapCaptor.getDeviceList();
+                    JpcapCaptor captor;
+                    captor = JpcapCaptor.openDevice(list2[choose-1], 65535, false, 20);
+
+                    int ptno=0;
+                    
+                    cal = Calendar.getInstance();
+                    sdf = new SimpleDateFormat("HH:mm:ss");
+                    System.out.println( sdf.format(cal.getTime()) );
+                    valnow = sdf.format(cal.getTime());
+                    arr3 = valnow.split(":");
+                    num1 = Integer.parseInt(arr3[0]);
+                    num2 = Integer.parseInt(arr3[1]);
+                    num3 = Integer.parseInt(arr3[2]);
+                    //System.out.println("" +num1 + num2 + num3);
+
+                    while (ptno < pktNo){
+                        Packet packet = captor.getPacket();
+                         
+                        if(packet != null){
+                                
+                            // get type of packets
+                            String s = packet.getClass().toString();
+                            String arr[] = s.split(" ");
+                            String arr1[] = arr[1].split("\\."); 
+                            String pkttype = arr1[2];
+
+                           if(pkttype.equals("UDPPacket")){
+
+                                UDPPacket p = (UDPPacket)packet;
+
+                                // Get the tcp src and dest ports
+                                String destPort =""+ p.dst_port ;
+                                String srcPort =""+ p.src_port;
+
+                                // Get the src and dest IP addresses from the IP layer
+                                String srcIp = p.src_ip.toString();
+                                String dstIp = p.dst_ip.toString();
+
+                                int pktversion  = p.version;
+
+                                String dlp= p.datalink.toString();
+                                String [] strdlp = dlp.split(" ");
+                                String [] mac = strdlp[1].split("->");
+
+                                String srcmac = mac[0];
+                                String destmac = mac[1];
+
+                                int pktsize = p.len;
+                                int pktNo = (ptno+1);
+                                
+                                pkttype = "UDP";
+
+                                
+                                String insert="INSERT INTO packet VALUES("+pktNo+",'"+pkttype+"','"+pktversion+"','"+srcIp+"','"+dstIp+"','"+srcPort+"','"+destPort+"','"+srcmac+"','"+destmac+"',"+pktsize+")";
+                                st.executeUpdate(insert);
+                                ptno++;
+
+                            }else if(pkttype.equals("TCPPacket")){
+
+                                TCPPacket p = (TCPPacket)packet;
+
+                                 // Get the tcp src and dest ports
+                                String destPort = "" + p.dst_port;
+                                String srcPort = "" + p.src_port;
+
+                                // Get the src and dest IP addresses from the IP layer
+                                String srcIp = p.src_ip.toString();
+                                String dstIp = p.dst_ip.toString();
+
+                                int pktversion  =  p.version;
+
+                                String dlp= p.datalink.toString();
+                                String [] strdlp = dlp.split(" ");
+                                String [] mac = strdlp[1].split("->");
+
+                                String srcmac = mac[0];
+                                String destmac = mac[1];                              
+
+                                int pktsize =  p.len;
+                                int pktNo = (ptno+1); 
+                                
+                                pkttype = "TCP";
+                                
+                                
+                                String insert="INSERT INTO packet VALUES("+pktNo+",'"+pkttype+"','"+pktversion+"','"+srcIp+"','"+dstIp+"','"+srcPort+"','"+destPort+"','"+srcmac+"','"+destmac+"',"+pktsize+")";
+                                st.executeUpdate(insert);   
+                                ptno++;
+                            
+                            }else if(pkttype.equals("ARPPacket")){
+
+                                ARPPacket p = (ARPPacket)packet;
+
+                                // Get the tcp src and dest ports
+                                String destPort ="" ;
+                                String srcPort ="";
+
+                                // Get the src and dest IP addresses from the IP layer
+                                String srcIp = "";
+                                String dstIp = "";
+
+                                int pktversion = 0 ;
+
+                                String dlp= p.datalink.toString();
+                                String [] strdlp = dlp.split(" ");
+                                String [] mac = strdlp[1].split("->");
+
+                                String srcmac = mac[0];
+                                String destmac = mac[1];
+
+                                int pktsize = p.len;
+                                int pktNo = ptno+1;
+                                
+                                pkttype = "ARP";
+
+                                
+                                String insert="INSERT INTO packet VALUES("+pktNo+",'"+pkttype+"','"+pktversion+"','"+srcIp+"','"+dstIp+"','"+srcPort+"','"+destPort+"','"+srcmac+"','"+destmac+"',"+pktsize+")";
+                                st.executeUpdate(insert);
+                                ptno++;
+
+                            }else if(arr1[2].equals("ICMPPacket")){
+
+                                ICMPPacket p = (ICMPPacket)packet;
+
+                                // Get the tcp src and dest ports
+                                String destPort ="" ;
+                                String srcPort ="";
+
+                                // Get the src and dest IP addresses from the IP layer
+                                String srcIp = p.src_ip.toString();
+                                String dstIp = p.dst_ip.toString();
+
+                                int pktversion  = p.version;
+
+                                String dlp= p.datalink.toString();
+                                String [] strdlp = dlp.split(" ");
+                                String [] mac = strdlp[1].split("->");
+
+                                String srcmac = mac[0];
+                                String destmac = mac[1];
+
+                                int pktsize = p.len;
+                                int pktNo = ptno+1;
+                                
+                                pkttype = "ICMP";
+
+                                
+                                String insert="INSERT INTO packet VALUES("+pktNo+",'"+pkttype+"','"+pktversion+"','"+srcIp+"','"+dstIp+"','"+srcPort+"','"+destPort+"','"+srcmac+"','"+destmac+"',"+pktsize+")";
+                                st.executeUpdate(insert);
+                                ptno++;
+                            }else{}
+                            
+                        }
+                        
+                    }  
+                    cal2 = Calendar.getInstance();
+                    sdf2 = new SimpleDateFormat("HH:mm:ss");
+                    System.out.println( sdf2.format(cal2.getTime()) );
+                    valnow2 = sdf2.format(cal2.getTime());
+                    arr2 = valnow2.split(":");
+                    num4 = Integer.parseInt(arr2[0]);
+                    num5 = Integer.parseInt(arr2[1]);
+                    num6 = Integer.parseInt(arr2[2]);
+                    
+                    label4.setText("Saved......");
+                    label4.setFont(new Font("Arial",2 , 30));
+                    panel2.add(label4);
+          
+                    panel4.removeAll();
+
+                    panel4.add(button5);
+                    event5 e5 = new event5();
+                    button5.addActionListener(e5);
+                    
+                    panel4.add(button6);
+                    event6 e6 = new event6();
+                    button6.addActionListener(e6);
+
+                    panel4.add(label7);
+                    panel4.add(label6);
+
+               }catch(IOException ioe) { ioe.printStackTrace(); }
+
+            } catch (SQLException e) {
+                System.out.println("SQL Exception: "+ e.toString());
+            }
+        }
+    }
+    
+    public class event3 implements ActionListener{ //button3
+        public void actionPerformed(ActionEvent e3){
+            
+            try {  
+                Statement st = Connect1();    
+
+                panel3.add(cBox1);
+                cBox1.setPreferredSize(new Dimension(120, 23));
+                panel3.add(textField5);
+                panel3.add(cBox2);
+                cBox2.setPreferredSize(new Dimension(120, 23));
+                panel3.add(textField6);
+                panel3.add(cBox3);
+                cBox3.setPreferredSize(new Dimension(120, 23));
+                panel3.add(textField7);
+                panel3.add(cBox4);
+                cBox4.setPreferredSize(new Dimension(120, 23));
+                panel3.add(textField8);
+                panel3.add(cBox5);
+                cBox5.setPreferredSize(new Dimension(120, 23));
+                panel3.add(textField9);
+                panel3.add(button4);
+                
+                
+                ResultSet r = st.executeQuery("SELECT COUNT(*) AS rowcount from packet");
+                r.next();
+                int count = r.getInt("rowcount");
+                r.close();
+               
+                
+                ResultSet rs = st.executeQuery("select * from packet");
+                
+                String [] colNames = {"pktNo","pktType","IPVersion", "srcIp", "dstIp", "srcPort", "destPort","srcMac","destMac","pktSize"};
+
+                int m = 0;
+               
+                data = new Object [count][10];
+               
+                while (rs.next()) {
+                    int pktNo = rs.getInt("pktNo");
+                    String pkttype = rs.getString("pktType");
+                    int pktversion = rs.getInt("pktVersion");
+                    String srcIp = rs.getString("srcIP");
+                    String dstIp = rs.getString("destIP");
+                    String srcPort = rs.getString("srcPort");
+                    String destPort = rs.getString("destPort");
+                    String srcmac = rs.getString("srcMac");
+                    String destmac = rs.getString("destMac");
+                    int pktsize = rs.getInt("pktSize");
+
+                    Object [] details = {pktNo, pkttype,pktversion, srcIp, dstIp, srcPort, destPort,srcmac,destmac,pktsize};
+
+                    for (int j=0; j<10; j++){
+                                data[m][j] = details[j];                             
+                    } 
+                    m++;
+                }
+                
+                paneltest.removeAll();
+                
+                table1 = new JTable(data,colNames);
+
+                JTableHeader header = table1.getTableHeader();
+                paneltest.setLayout(new BorderLayout());
+                paneltest.add(header, BorderLayout.NORTH);
+                paneltest.add(table1, BorderLayout.CENTER);
+                
+                table1.setPreferredScrollableViewportSize(new Dimension(1100,420));
+                table1.setFillsViewportHeight(false);
+                table1.setBounds(25, 100, 450, 640);
+                JScrollPane scroll = new JScrollPane(table1);
+                paneltest.add(scroll);
+
+                table1.setFillsViewportHeight(true);
+                
+
+            } catch (SQLException e) {
+                System.out.println("SQL Exception: "+ e.toString());
+            }// catch(NullPointerException e){System.out.println("chinthakaeee");}
+        }
+    }
+
+     public class event4 implements ActionListener{
+        public void actionPerformed(ActionEvent e4){
+            
+            try{
+                
+               Statement st = Connect1();
+               
+               String q[]= {"","","","",""};
+               String key5[] = {"srcIP","destIP","srcPort","destPort","pktType"};
+               int count=0;
+               
+               if((cBox1.isSelected()) && (!textField5.getText().equalsIgnoreCase(""))){ 
+                   q[0] = textField5.getText();
+                   count++;
+               }else{q[0] = "";}
+               
+               if((cBox2.isSelected()) && (!textField6.getText().equalsIgnoreCase(""))){ 
+                   q[1] = textField6.getText();
+                   count++;
+               }else{q[1] = "";}
+               
+               if((cBox3.isSelected()) && (!textField7.getText().equalsIgnoreCase(""))){ 
+                   q[2] = textField7.getText();
+                   count++;
+               }else{q[2] = "";}
+               
+               if((cBox4.isSelected()) && (!textField8.getText().equalsIgnoreCase(""))) {
+                   q[3] = textField8.getText();
+                   count++;
+               }else{q[3] = "";}
+               
+               if((cBox5.isSelected()) && (!textField9.getText().equalsIgnoreCase(""))) {
+                   q[4] = textField9.getText();
+                   count++;
+               }else{q[4] = "";}
+               
+               
+               String syntax[] = new String[count];
+               String key[] = new String[count];
+               
+               System.out.println(count);
+               
+               int i=0;
+               int j=0;
+               
+               while(i < 5){
+                   if(!q[i].equals("")){
+                       syntax[j] = q[i];
+                       if(syntax[j].equals("tcp")) syntax[j] = "TCP";
+                       if(syntax[j].equals("udp")) syntax[j] = "UDP";
+                       if(syntax[j].equals("arp")) syntax[j] = "ARP";
+                       if(syntax[j].equals("icmp")) syntax[j] = "ICMP";
+                       key[j] = key5[i];
+                       j++;
+                   }
+                   i++;
+               }
+               int tcount = 0;
+
+               String [] colNames = {"pktNo","pktType","IPVersion", "srcIp", "dstIp", "srcPort", "destPort","srcMac","destMac","pktSize"};
+              
+               int m = 0;
+               ResultSet rs=null;
+               if(count == 1){
+
+                    ResultSet r = st.executeQuery("SELECT COUNT(*) AS rowcount from packet where "+key[0]+"= '"+syntax[0]+"'");
+                    r.next();
+                    tcount = r.getInt("rowcount");
+                    r.close();
+
+                data1 = new Object [tcount][10];
+                            
+                rs = st.executeQuery("select * from packet where "+key[0]+"= '"+syntax[0]+"'");
+                
+               }
+               
+                if(count == 2){
+                   
+                    ResultSet r = st.executeQuery("SELECT COUNT(*) AS rowcount from packet where "+key[0]+"= '"+syntax[0]+"' and "+key[1]+"= '"+syntax[1]+"'");
+                    r.next();
+                    tcount = r.getInt("rowcount");
+                    r.close();
+
+                data1 = new Object [tcount][10];
+                            
+                rs = st.executeQuery("select * from packet where "+key[0]+"= '"+syntax[0]+"' and "+key[1]+"= '"+syntax[1]+"'");
+                
+               }
+                              
+                if(count == 3){
+                   
+                    ResultSet r = st.executeQuery("SELECT COUNT(*) AS rowcount from packet where "+key[0]+"= '"+syntax[0]+"' and "+key[1]+"= '"+syntax[1]+"' and "+key[2]+"= '"+syntax[2]+"'");
+                    r.next();
+                    tcount = r.getInt("rowcount");
+                    r.close();
+
+                data1 = new Object [tcount][10];
+                            
+                rs = st.executeQuery("select * from packet where "+key[0]+"= '"+syntax[0]+"' and "+key[1]+"= '"+syntax[1]+"' and "+key[2]+"= '"+syntax[2]+"'");
+                
+               }
+                              
+                if(count == 4){
+                   
+                    ResultSet r = st.executeQuery("SELECT COUNT(*) AS rowcount from packet where "+key[0]+"= '"+syntax[0]+"'"+key[1]+"= '"+syntax[1]+"' and "+key[2]+" = '"+syntax[2]+"' and "+key[3]+ " = '"+syntax[3]+"'");
+                    r.next();
+                    tcount = r.getInt("rowcount");
+                    r.close();
+
+                data1 = new Object [tcount][10];
+                            
+                rs = st.executeQuery("select * from packet where "+key[0]+"= '"+syntax[0]+"'"+key[1]+"= '"+syntax[1]+"' and "+key[2]+" = '"+syntax[2]+"' and "+key[3]+ " = '"+syntax[3]+"'");
+                
+               }
+                                             
+                if(count == 5){
+                   
+                    ResultSet r = st.executeQuery("SELECT COUNT(*) AS rowcount from packet where "+key[0]+"= '"+syntax[0]+"'"+key[1]+"= '"+syntax[2]+"'"+key[3]+"= '"+syntax[3]+"' and "+key[3]+"= '"+syntax[3]+"' and "+key[4]+"= '"+syntax[4]+"'");
+                    r.next();
+                    tcount = r.getInt("rowcount");
+                    r.close();
+
+                data1 = new Object [tcount][10];
+                            
+                rs = st.executeQuery("select * from packet where "+key[0]+"= '"+syntax[0]+"'"+key[1]+"= '"+syntax[2]+"'"+key[3]+"= '"+syntax[3]+"' and "+key[3]+"= '"+syntax[3]+"' and "+key[4]+"= '"+syntax[4]+"'");
+                
+               }
+                while (rs.next()) {
+                    int pktNo = rs.getInt("pktNo");
+                    String pkttype = rs.getString("pktType");
+                    int pktversion = rs.getInt("pktVersion");
+                    String srcIp = rs.getString("srcIP");
+                    String dstIp = rs.getString("destIP");
+                    String srcPort = rs.getString("srcPort");
+                    String destPort = rs.getString("destPort");
+                    String srcmac = rs.getString("srcMac");
+                    String destmac = rs.getString("destMac");
+                    int pktsize = rs.getInt("pktSize");
+
+                    Object [] details = {pktNo, pkttype,pktversion, srcIp, dstIp, srcPort, destPort,srcmac,destmac,pktsize};
+
+                    for(int k=0; k<10; k++){
+                                data1[m][k] = details[k];                             
+                    } 
+                    m++;
+                }
+                rs.close();
+
+                JTable table = new JTable(data1,colNames);   
+                
+                paneltest1.removeAll();
+                
+                JTableHeader header = table.getTableHeader();
+                paneltest1.setLayout(new BorderLayout());
+                paneltest1.add(header, BorderLayout.NORTH);
+                paneltest1.add(table, BorderLayout.CENTER);
+                
+                table.setPreferredScrollableViewportSize(new Dimension(1100,420));
+                table.setFillsViewportHeight(false);
+                table.setBounds(25, 100, 450, 640);
+                JScrollPane scroll = new JScrollPane(table);
+                paneltest1.add(scroll);
+
+                table1.setFillsViewportHeight(true);
+                
+                frame = new JFrame("Packets From A IP");
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.add(paneltest1);
+
+                frame.pack();
+                frame.setResizable(false);
+                frame.setVisible(true);
+               // paneltest1.add(table);
+
+            } catch (SQLException e) {
+                System.out.println("SQL Exception: "+ e.toString());
+            } catch(NullPointerException e){System.out.println("test1");}
+       }
+    }
+    
+    public class event5 implements ActionListener{
+        public void actionPerformed(ActionEvent e5){
+
+            try {  
+                Statement st = Connect1(); 
+                ResultSet rs = st.executeQuery("select pktSize from packet");
+                
+                sum = 0;
+                while (rs.next()){
+                    sum = sum + rs.getInt("pktSize");
+                }
+                rs.close();
+                label7.setText("" + sum + " Bytes");
+                label7.setFont(new Font("Arial",2 , 30));
+                
+                
+                
+            } catch (SQLException e) {
+                System.out.println("SQL Exception: "+ e.toString());
+            }
+            
+        }
+    }
+    
+    public class event6 implements ActionListener{
+        public void actionPerformed(ActionEvent e6){
+
+            int num;
+            
+            try {  
+                Statement st = Connect1(); 
+                ResultSet rs = st.executeQuery("select pktSize from packet");
+                
+                int sum1 = 0;
+                while (rs.next()){
+                    sum1 = sum1 + rs.getInt("pktSize");
+                }
+                rs.close();
+                if (num5 >= num2){
+                    num = (num5-num2)*60 + (num6 - num3);
+
+                }
+                else {
+                    num = (num5+60-num2)*60 + (num6-num3);
+
+                }    
+                int val = (int)(sum1*100.0/num/1024);
+                label6.setText("" + (val/100.0) + " MB/s");
+                label6.setFont(new Font("Arial",2 , 23));
+                
+            } catch (SQLException e) {
+                System.out.println("SQL Exception: "+ e.toString());
+            }
+        }
+    }
+    
+    public static Statement Connect(){
+        Connection conn = null;
+        Statement stmt = null;
+        try{
+           Class.forName("com.mysql.jdbc.Driver");
+           conn = DriverManager.getConnection("jdbc:mysql://localhost/", "root", "");
+           stmt = conn.createStatement();    
+        }catch(SQLException se){
+
+           se.printStackTrace();
+        }catch(Exception e){ 
+           e.printStackTrace();
+        }
+        return stmt;
+   }
+    
+    public static Statement Connect1(){
+        Connection conn = null;
+        Statement stmt = null;
+        try{
+           Class.forName("com.mysql.jdbc.Driver");
+            String connectionUrl = "jdbc:mysql://localhost/project1?" + "user=root&password=";
+            Connection con = DriverManager.getConnection(connectionUrl);   
+            
+            stmt = con.createStatement();
+            
+        }catch(SQLException se){
+
+           se.printStackTrace();
+           
+        }catch(Exception e){ 
+           e.printStackTrace();
+        }
+        return stmt;
+        
+   }
+       
+   public static void main(String[] args) throws SQLException {
+        Cmachine gui = new Cmachine();
+        gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        gui.setVisible(true);
+        gui.pack();
+        gui.setSize(1200, 700);
+        gui.setTitle("Capture Machine");
+    }  
+}
