@@ -1,0 +1,69 @@
+//Testing the connectivity of database and the java platform
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class TestDatabase {
+
+    public static void main(String[] args) throws SQLException {
+        
+        Statement st1 = Connect();
+        st1.executeUpdate("drop database student");
+        st1.executeUpdate("CREATE DATABASE student");
+        
+        Statement st2 = Connect1();
+        st2.executeUpdate("use student");
+        st2.executeUpdate("create table data(name varchar(15),age int)");
+        st2.executeUpdate("insert into data values('danushka',23),('eranga',24)");
+        
+        ResultSet rs = st2.executeQuery("select * from data");
+        
+        while (rs.next()) {
+            System.out.print("Name = " + rs.getString("name"));
+            System.out.println("Age = " + rs.getInt("age"));
+        }
+        rs.close();
+        
+        
+    }
+    
+    public static Statement Connect(){
+        Connection conn = null;
+        Statement stmt = null;
+        try{
+           Class.forName("com.mysql.jdbc.Driver");
+           conn = DriverManager.getConnection("jdbc:mysql://localhost/", "root", "");
+           stmt = conn.createStatement();    
+        }catch(SQLException se){
+
+           se.printStackTrace();
+        }catch(Exception e){ 
+           e.printStackTrace();
+        }
+        return stmt;
+   }
+    
+    public static Statement Connect1(){
+        Connection con = null;
+        Statement stmt = null;
+        try{
+           Class.forName("com.mysql.jdbc.Driver");
+            String connectionUrl = "jdbc:mysql://localhost/student?" + "user=root&password=";
+            con = DriverManager.getConnection(connectionUrl);   
+            
+            stmt = con.createStatement();
+            
+        }catch(SQLException se){
+
+           se.printStackTrace();
+           
+        }catch(Exception e){ 
+           e.printStackTrace();
+        }
+        return stmt;      
+   }
+    
+}
