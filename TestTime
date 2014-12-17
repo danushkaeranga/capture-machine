@@ -1,0 +1,27 @@
+
+//Testing the time of packet capturing
+
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+public class TestTime {
+   
+   public static void main(String[] args) throws SQLException {
+   
+        Calendar cal = Calendar.getInstance();
+    	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    	System.out.println( sdf.format(cal.getTime()) );
+        
+        long  i = 0;
+        while (i < 1000000000){
+            i++;
+        }
+        
+        Calendar cal1 = Calendar.getInstance();
+    	SimpleDateFormat sdf1 = new SimpleDateFormat("HH:mm:ss");
+    	System.out.println( sdf1.format(cal1.getTime()) );
+   }
+   
+   
+}
